@@ -124,10 +124,15 @@ def build_analysis_prompt(videos: list[dict], top_channels: list[dict], keywords
   "product_recommendations": [
     {{"product": "추천 제품/카테고리", "reason": "추천 이유", "opportunity": "기회 요인"}}
   ],
-  "market_insight": "한국/일본 시장 차이점 및 인사이트 (2-3문장)"
+  "market_insight": "한국/일본 시장 차이점 및 인사이트 (2-3문장)",
+  "translated_titles": {{
+    "일본어 또는 영어 원본 제목": "한국어 번역 제목 (30자 이내로 요약)"
+  }}
 }}
 
-trending_topics는 최소 3개, trending_products는 최소 3개, content_recommendations는 정확히 3개, product_recommendations는 정확히 3개 포함하세요."""
+중요 규칙:
+- trending_topics는 최소 3개, trending_products는 최소 3개, content_recommendations는 정확히 3개, product_recommendations는 정확히 3개 포함하세요.
+- translated_titles: TOP 20 영상 중 일본어 또는 영어로 된 제목만 한국어로 번역해주세요. 한국어 제목은 제외. 번역 제목은 핵심만 담아 30자 이내로 작성하세요."""
 
 
 def analyze_with_claude(prompt: str) -> dict:

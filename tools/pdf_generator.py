@@ -109,26 +109,30 @@ STYLES = {
 
 
 class ColorRect(Flowable):
-    """배경색 채운 직사각형 + 내부 Paragraph"""
-    def __init__(self, content, bg_color, width, height, padding=5*mm, text_style=None):
+    """배경색 채운 직사각형 + 내부 Paragraph (높이 자동 계산)"""
+    def __init__(self, content, bg_color, width, height=None, padding=5*mm, text_style=None):
         super().__init__()
         self.content = content
         self.bg = bg_color
         self.w = width
-        self.h = height
+        self.h = height  # None이면 텍스트 높이에 맞게 자동 계산
         self.pad = padding
         self.style = text_style or STYLES["body"]
+
+    def wrap(self, aw, ah):
+        p = Paragraph(self.content, self.style)
+        pw = self.w - 2 * self.pad
+        _, text_h = p.wrap(pw, 99999)
+        self.h = text_h + 2 * self.pad
+        return self.w, self.h
 
     def draw(self):
         self.canv.setFillColor(self.bg)
         self.canv.rect(0, 0, self.w, self.h, fill=1, stroke=0)
         p = Paragraph(self.content, self.style)
         pw = self.w - 2 * self.pad
-        p.wrapOn(self.canv, pw, self.h)
-        p.drawOn(self.canv, self.pad, self.pad)
-
-    def wrap(self, aw, ah):
-        return self.w, self.h
+        _, text_h = p.wrap(pw, 99999)
+        p.drawOn(self.canv, self.pad, self.h - text_h - self.pad)
 
 
 def fmt_num(n):
@@ -237,7 +241,7 @@ def build_channels_page(story, raw, analysis_data):
     story.append(Paragraph("이번 주 요약", STYLES["section_ttl"]))
 
     summary = analysis.get("weekly_summary", "")
-    box = ColorRect(summary, C_NAVY, usable_w, 24*mm, 5*mm, STYLES["summary_box"])
+    box = ColorRect(summary, C_NAVY, usable_w, padding=5*mm, text_style=STYLES["summary_box"])
     story.append(box)
     story.append(Spacer(1, 8*mm))
 
@@ -380,7 +384,7 @@ def build_chart_page(story, raw, analysis_data):
     story.append(Paragraph("시장 인사이트", STYLES["section_ttl"]))
 
     insight = analysis.get("market_insight", "")
-    box = ColorRect(insight, C_NAVY, usable_w, 28*mm, 5*mm, STYLES["insight_box"])
+    box = ColorRect(insight, C_NAVY, usable_w, padding=5*mm, text_style=STYLES["insight_box"])
     story.append(box)
     story.append(PageBreak())
 
@@ -396,7 +400,7 @@ def build_recommendations_page(story, raw, analysis_data):
     story.append(Paragraph("콘텐츠 주제 추천", STYLES["section_ttl"]))
 
     for rec in analysis.get("content_recommendations", []):
-        kw_box = ColorRect(rec.get("target_keyword", ""), C_BLACK, 30*mm, 6*mm, 2*mm, STYLES["rec_tag"])
+        kw_box = ColorRect(rec.get("target_keyword", ""), C_BLACK, 40*mm, padding=3*mm, text_style=STYLES["rec_tag"])
         story.append(KeepTogether([
             kw_box,
             Spacer(1, 1*mm),
@@ -438,19 +442,21 @@ def build_recommendations_page(story, raw, analysis_data):
 def build_videos_page(story, raw, analysis_data):
     usable_w = PAGE_W - 2 * MARGIN
     videos = raw.get("videos", [])[:20]
+    translated = analysis_data.get("analysis", {}).get("translated_titles", {})
 
     story.append(Paragraph("Video Ranking", STYLES["section_lbl"]))
     story.append(Paragraph("급상승 영상 TOP 20", STYLES["section_ttl"]))
 
     headers = ["#", "영상 제목", "채널", "조회수", "참여율"]
-    col_widths = [10*mm, 80*mm, 35*mm, 22*mm, 16*mm]
+    col_widths = [8*mm, 97*mm, 30*mm, 22*mm, 17*mm]
     data = [[Paragraph(h, STYLES["table_head"]) for h in headers]]
 
     for i, v in enumerate(videos, 1):
         country = v.get("channel_country", "")
         flag = "🇰🇷" if country == "KR" else ("🇯🇵" if country == "JP" else "")
-        title = v.get("title", "")[:40]
-        shorts_mark = " #S" if v.get("is_short") else ""
+        orig_title = v.get("title", "")
+        title = translated.get(orig_title, orig_title)
+        shorts_mark = "  [쇼츠]" if v.get("is_short") else ""
         data.append([
             Paragraph(str(i), STYLES["table_cell"]),
             Paragraph(title + shorts_mark, STYLES["table_cell"]),
