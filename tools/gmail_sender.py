@@ -25,7 +25,7 @@ SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 587
 
 
-def find_latest_report() -> Path | None:
+def find_latest_report():
     pdfs = sorted(TMP_DIR.glob("weekly_report_*.pdf"), reverse=True)
     return pdfs[0] if pdfs else None
 

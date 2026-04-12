@@ -6,9 +6,9 @@ raw_data.json + analysis.json을 Notion Database에 누적 저장한다.
 import os
 import json
 import datetime
+import requests
 from pathlib import Path
 from dotenv import load_dotenv
-from notion_client import Client
 
 load_dotenv()
 
@@ -18,8 +18,34 @@ ANALYSIS_FILE = TMP_DIR / "analysis.json"
 
 NOTION_TOKEN = os.environ["NOTION_TOKEN"]
 DATABASE_ID = os.environ["NOTION_DATABASE_ID"]
+NOTION_VERSION = "2022-06-28"
 
-notion = Client(auth=NOTION_TOKEN)
+HEADERS = {
+    "Authorization": f"Bearer {NOTION_TOKEN}",
+    "Notion-Version": NOTION_VERSION,
+    "Content-Type": "application/json",
+}
+
+
+def setup_database_schema():
+    """필요한 컬럼이 없으면 데이터베이스에 추가"""
+    r = requests.get(f"https://api.notion.com/v1/databases/{DATABASE_ID}", headers=HEADERS)
+    r.raise_for_status()
+    existing = set(r.json().get("properties", {}).keys())
+
+    add_props = {}
+    if "수집 영상수" not in existing:
+        add_props["수집 영상수"] = {"number": {"format": "number"}}
+    for col in ["상위 채널", "트렌딩 키워드", "추천 제품", "추천 콘텐츠 주제", "분석 요약", "시장 인사이트"]:
+        if col not in existing:
+            add_props[col] = {"rich_text": {}}
+
+    if add_props:
+        requests.patch(f"https://api.notion.com/v1/databases/{DATABASE_ID}",
+                       headers=HEADERS, json={"properties": add_props}).raise_for_status()
+        print(f"  컬럼 추가됨: {', '.join(add_props.keys())}")
+    else:
+        print("  스키마 확인 완료")
 
 
 def format_date(iso_str: str) -> str:
@@ -165,17 +191,22 @@ def main():
     raw = json.loads(RAW_FILE.read_text(encoding="utf-8"))
     analysis_data = json.loads(ANALYSIS_FILE.read_text(encoding="utf-8"))
 
+    print("Notion Database 스키마 확인 중...")
+    setup_database_schema()
     print("Notion Database에 항목 생성 중...")
 
     properties = build_page_properties(raw, analysis_data)
     content_blocks = build_page_content(raw, analysis_data)
 
     # 페이지 생성 (블록은 100개 제한이 있어 먼저 페이지 만들고 이후 추가)
-    page = notion.pages.create(
-        parent={"database_id": DATABASE_ID},
-        properties=properties,
-        children=content_blocks[:100],
-    )
+    payload = {
+        "parent": {"database_id": DATABASE_ID},
+        "properties": properties,
+        "children": content_blocks[:100],
+    }
+    r = requests.post("https://api.notion.com/v1/pages", headers=HEADERS, json=payload)
+    r.raise_for_status()
+    page = r.json()
 
     page_id = page["id"]
     print(f"완료. Notion 페이지 생성: {page_id}")

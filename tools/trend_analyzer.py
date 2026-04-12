@@ -134,7 +134,7 @@ def analyze_with_claude(prompt: str) -> dict:
     """Claude API로 트렌드 분석"""
     message = client.messages.create(
         model="claude-sonnet-4-5",
-        max_tokens=2000,
+        max_tokens=4096,
         messages=[{"role": "user", "content": prompt}],
     )
     raw = message.content[0].text.strip()
