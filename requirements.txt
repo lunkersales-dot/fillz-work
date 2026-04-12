@@ -1,0 +1,9 @@
+anthropic
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+notion-client
+reportlab
+jinja2
+matplotlib
+python-dotenv

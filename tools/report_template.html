@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+  :root {
+    --black: #111111;
+    --navy: #1B2A4A;
+    --gray-dark: #444444;
+    --gray-mid: #888888;
+    --gray-light: #F4F4F4;
+    --white: #FFFFFF;
+    --accent: #1B2A4A;
+    --border: #E0E0E0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 10pt;
+    color: var(--black);
+    background: var(--white);
+    line-height: 1.6;
+  }
+
+  /* ── 페이지 설정 ── */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  @page :first {
+    margin: 0;
+  }
+
+  /* ── 커버 페이지 ── */
+  .cover {
+    width: 210mm;
+    height: 297mm;
+    background: var(--black);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20mm 18mm;
+    page-break-after: always;
+  }
+
+  .cover-top {}
+
+  .cover-logo {
+    width: 140px;
+    margin-bottom: 8mm;
+    filter: invert(1);  /* 흰색 로고로 */
+  }
+
+  .cover-subtitle {
+    color: var(--gray-mid);
+    font-size: 9pt;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 30mm;
+  }
+
+  .cover-title {
+    color: var(--white);
+    font-size: 32pt;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 6mm;
+  }
+
+  .cover-title span {
+    color: var(--gray-mid);
+    font-size: 16pt;
+    font-weight: 300;
+    display: block;
+    margin-bottom: 3mm;
+  }
+
+  .cover-summary {
+    color: #AAAAAA;
+    font-size: 10pt;
+    font-weight: 300;
+    line-height: 1.8;
+    margin-top: 8mm;
+    max-width: 120mm;
+  }
+
+  .cover-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 1px solid #333;
+    padding-top: 6mm;
+  }
+
+  .cover-date {
+    color: var(--gray-mid);
+    font-size: 9pt;
+    letter-spacing: 1px;
+  }
+
+  .cover-brand {
+    color: var(--gray-mid);
+    font-size: 8pt;
+    letter-spacing: 2px;
+    text-align: right;
+  }
+
+  /* ── 내지 공통 ── */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 15mm 18mm 18mm;
+    page-break-after: always;
+  }
+
+  .page:last-child {
+    page-break-after: avoid;
+  }
+
+  /* ── 헤더 (내지) ── */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 5mm;
+    border-bottom: 2px solid var(--black);
+    margin-bottom: 8mm;
+  }
+
+  .page-header-brand {
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--black);
+  }
+
+  .page-header-date {
+    font-size: 8pt;
+    color: var(--gray-mid);
+  }
+
+  /* ── 섹션 제목 ── */
+  .section {
+    margin-bottom: 10mm;
+  }
+
+  .section-label {
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--gray-mid);
+    text-transform: uppercase;
+    margin-bottom: 2mm;
+  }
+
+  .section-title {
+    font-size: 16pt;
+    font-weight: 900;
+    color: var(--black);
+    margin-bottom: 5mm;
+    line-height: 1.2;
+  }
+
+  /* ── 요약 카드 ── */
+  .summary-box {
+    background: var(--navy);
+    color: var(--white);
+    padding: 8mm 10mm;
+    border-radius: 4px;
+    font-size: 11pt;
+    font-weight: 400;
+    line-height: 1.8;
+    margin-bottom: 8mm;
+  }
+
+  /* ── 채널 테이블 ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    margin-bottom: 6mm;
+  }
+
+  thead tr {
+    background: var(--black);
+    color: var(--white);
+  }
+
+  thead th {
+    padding: 3mm 4mm;
+    text-align: left;
+    font-weight: 500;
+    font-size: 8pt;
+    letter-spacing: 0.5px;
+  }
+
+  thead th:not(:first-child) {
+    text-align: right;
+  }
+
+  tbody tr:nth-child(even) {
+    background: var(--gray-light);
+  }
+
+  tbody td {
+    padding: 2.5mm 4mm;
+    color: var(--gray-dark);
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody td:not(:first-child) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rank {
+    font-weight: 700;
+    color: var(--black);
+    min-width: 8mm;
+    display: inline-block;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 20px;
+    font-size: 7pt;
+    font-weight: 700;
+  }
+
+  .badge-kr { background: #E8F0FE; color: #1967D2; }
+  .badge-jp { background: #FCE8E6; color: #C5221F; }
+
+  /* ── 키워드 태그 클라우드 ── */
+  .keyword-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2mm;
+    margin-bottom: 6mm;
+  }
+
+  .keyword-tag {
+    padding: 1.5mm 4mm;
+    border: 1.5px solid var(--black);
+    border-radius: 20px;
+    font-size: 9pt;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .keyword-tag.large {
+    font-size: 11pt;
+    font-weight: 700;
+    border-width: 2px;
+    padding: 2mm 5mm;
+  }
+
+  .keyword-tag.small {
+    font-size: 8pt;
+    border-color: var(--gray-mid);
+    color: var(--gray-dark);
+  }
+
+  /* ── 트렌드 카드 그리드 ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4mm;
+    margin-bottom: 6mm;
+  }
+
+  .card {
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    padding: 5mm;
+  }
+
+  .card-number {
+    font-size: 20pt;
+    font-weight: 900;
+    color: var(--gray-light);
+    line-height: 1;
+    margin-bottom: 2mm;
+  }
+
+  .card-title {
+    font-size: 10pt;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 2mm;
+  }
+
+  .card-desc {
+    font-size: 8pt;
+    color: var(--gray-dark);
+    line-height: 1.5;
+  }
+
+  .card-meta {
+    font-size: 7pt;
+    color: var(--gray-mid);
+    margin-top: 2mm;
+    font-style: italic;
+  }
+
+  /* ── 추천 섹션 ── */
+  .recommendation {
+    border-left: 3px solid var(--black);
+    padding: 4mm 6mm;
+    margin-bottom: 4mm;
+    background: var(--gray-light);
+  }
+
+  .recommendation-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 1mm;
+  }
+
+  .recommendation-keyword {
+    display: inline-block;
+    background: var(--black);
+    color: var(--white);
+    font-size: 7pt;
+    padding: 0.5mm 3mm;
+    border-radius: 2px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 2mm;
+  }
+
+  .recommendation-reason {
+    font-size: 9pt;
+    color: var(--gray-dark);
+    line-height: 1.5;
+  }
+
+  /* ── 제품 추천 ── */
+  .product-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 5mm;
+    padding: 5mm 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .product-number {
+    font-size: 22pt;
+    font-weight: 900;
+    color: var(--gray-light);
+    min-width: 12mm;
+    line-height: 1;
+  }
+
+  .product-name {
+    font-size: 11pt;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 1mm;
+  }
+
+  .product-reason {
+    font-size: 9pt;
+    color: var(--gray-dark);
+    line-height: 1.5;
+  }
+
+  .product-opportunity {
+    font-size: 8pt;
+    color: var(--navy);
+    margin-top: 1mm;
+    font-weight: 500;
+  }
+
+  /* ── 차트 영역 ── */
+  .chart-container {
+    margin-bottom: 6mm;
+    text-align: center;
+  }
+
+  .chart-container img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* ── 포맷 분석 2열 ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6mm;
+    margin-bottom: 6mm;
+  }
+
+  .info-block {
+    background: var(--gray-light);
+    padding: 5mm;
+    border-radius: 4px;
+  }
+
+  .info-block-label {
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--gray-mid);
+    text-transform: uppercase;
+    margin-bottom: 2mm;
+  }
+
+  .info-block-value {
+    font-size: 10pt;
+    color: var(--black);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  /* ── 영상 목록 ── */
+  .video-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 4mm;
+    padding: 3mm 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .video-rank {
+    font-size: 9pt;
+    font-weight: 700;
+    color: var(--gray-mid);
+    min-width: 8mm;
+    text-align: right;
+  }
+
+  .video-info { flex: 1; }
+
+  .video-title {
+    font-size: 9pt;
+    font-weight: 500;
+    color: var(--black);
+    line-height: 1.3;
+    margin-bottom: 1mm;
+  }
+
+  .video-meta {
+    font-size: 8pt;
+    color: var(--gray-mid);
+  }
+
+  .video-views {
+    font-size: 9pt;
+    font-weight: 700;
+    color: var(--navy);
+    min-width: 20mm;
+    text-align: right;
+  }
+
+  /* ── 푸터 ── */
+  .page-footer {
+    position: fixed;
+    bottom: 8mm;
+    left: 18mm;
+    right: 18mm;
+    display: flex;
+    justify-content: space-between;
+    font-size: 7pt;
+    color: var(--gray-mid);
+    border-top: 1px solid var(--border);
+    padding-top: 3mm;
+  }
+
+  /* ── 구분선 ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 6mm 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ 커버 ═══════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-top">
+    <img src="{{ logo_path }}" class="cover-logo" alt="FILLZ">
+    <div class="cover-subtitle">FISHING GEAR · MARKET INTELLIGENCE</div>
+
+    <div class="cover-title">
+      <span>주간 루어낚시</span>
+      트렌드 리포트
+    </div>
+
+    <div class="cover-summary">
+      {{ weekly_summary }}
+    </div>
+  </div>
+
+  <div class="cover-bottom">
+    <div class="cover-date">{{ report_date }}<br>KR + JP 마켓 분석</div>
+    <div class="cover-brand">FILLZ FISHING GEAR<br>WEEKLY INTELLIGENCE</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ P2: 요약 + 채널 TOP10 ════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-brand">FILLZ · WEEKLY TREND</div>
+    <div class="page-header-date">{{ report_date }}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Executive Summary</div>
+    <div class="section-title">이번 주 요약</div>
+    <div class="summary-box">{{ weekly_summary }}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Top Channels</div>
+    <div class="section-title">인기 채널 TOP 10</div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>채널명</th>
+          <th>국가</th>
+          <th>구독자</th>
+          <th>주간 조회수</th>
+          <th>업로드</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ch in top_channels %}
+        <tr>
+          <td><span class="rank">{{ loop.index }}</span></td>
+          <td>{{ ch.channel_title }}</td>
+          <td>
+            {% if ch.channel_country == 'KR' %}<span class="badge badge-kr">KR</span>
+            {% elif ch.channel_country == 'JP' %}<span class="badge badge-jp">JP</span>
+            {% else %}<span class="badge">{{ ch.channel_country or '—' }}</span>{% endif %}
+          </td>
+          <td>{{ "{:,}".format(ch.subscriber_count) }}</td>
+          <td>{{ "{:,}".format(ch.total_views_this_week) }}</td>
+          <td>{{ ch.video_count_this_week }}편</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-footer">
+    <span>FILLZ FISHING GEAR — 주간 트렌드 리포트</span>
+    <span>{{ report_date }} | 기밀 문서</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ P3: 트렌딩 주제 + 키워드 ════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-brand">FILLZ · TREND ANALYSIS</div>
+    <div class="page-header-date">{{ report_date }}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Trending Keywords</div>
+    <div class="section-title">급상승 키워드</div>
+    <div class="keyword-cloud">
+      {% for kw in top_keywords %}
+        {% if loop.index <= 3 %}
+          <span class="keyword-tag large">{{ kw.keyword }}</span>
+        {% elif loop.index <= 8 %}
+          <span class="keyword-tag">{{ kw.keyword }}</span>
+        {% else %}
+          <span class="keyword-tag small">{{ kw.keyword }}</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Hot Topics</div>
+    <div class="section-title">트렌딩 주제</div>
+    <div class="card-grid">
+      {% for topic in trending_topics %}
+      <div class="card">
+        <div class="card-number">0{{ loop.index }}</div>
+        <div class="card-title">{{ topic.topic }}</div>
+        <div class="card-desc">{{ topic.reason }}</div>
+        <div class="card-meta">{{ topic.evidence }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Format Analysis</div>
+    <div class="section-title">잘 되는 포맷 분석</div>
+    <div class="two-col">
+      <div class="info-block">
+        <div class="info-block-label">쇼츠 vs 롱폼</div>
+        <div class="info-block-value">{{ format_analysis.shorts_vs_longform }}</div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-label">인기 영상 길이</div>
+        <div class="info-block-value">{{ format_analysis.best_performing_length }}</div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-label">제목 패턴</div>
+        <div class="info-block-value">{{ format_analysis.title_patterns }}</div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-label">썸네일 패턴</div>
+        <div class="info-block-value">{{ format_analysis.thumbnail_patterns }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>FILLZ FISHING GEAR — 주간 트렌드 리포트</span>
+    <span>{{ report_date }} | 기밀 문서</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ P4: 차트 ════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-brand">FILLZ · DATA VISUALIZATION</div>
+    <div class="page-header-date">{{ report_date }}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Channel Performance</div>
+    <div class="section-title">채널별 주간 조회수</div>
+    <div class="chart-container">
+      <img src="data:image/png;base64,{{ chart_channels }}">
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Market Insight</div>
+    <div class="section-title">시장 인사이트</div>
+    <div class="summary-box">{{ market_insight }}</div>
+  </div>
+
+  <div class="page-footer">
+    <span>FILLZ FISHING GEAR — 주간 트렌드 리포트</span>
+    <span>{{ report_date }} | 기밀 문서</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ P5: 콘텐츠 + 제품 추천 ════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-brand">FILLZ · RECOMMENDATIONS</div>
+    <div class="page-header-date">{{ report_date }}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Content Strategy</div>
+    <div class="section-title">콘텐츠 주제 추천</div>
+    {% for rec in content_recommendations %}
+    <div class="recommendation">
+      <div class="recommendation-keyword">{{ rec.target_keyword }}</div>
+      <div class="recommendation-title">{{ rec.title }}</div>
+      <div class="recommendation-reason">{{ rec.reason }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="section">
+    <div class="section-label">Product Opportunity</div>
+    <div class="section-title">제품 추천</div>
+    {% for rec in product_recommendations %}
+    <div class="product-card">
+      <div class="product-number">0{{ loop.index }}</div>
+      <div>
+        <div class="product-name">{{ rec.product }}</div>
+        <div class="product-reason">{{ rec.reason }}</div>
+        <div class="product-opportunity">→ {{ rec.opportunity }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="page-footer">
+    <span>FILLZ FISHING GEAR — 주간 트렌드 리포트</span>
+    <span>{{ report_date }} | 기밀 문서</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ P6: TOP 20 영상 목록 ═══════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-brand">FILLZ · VIDEO RANKING</div>
+    <div class="page-header-date">{{ report_date }}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Video Ranking</div>
+    <div class="section-title">급상승 영상 TOP 20</div>
+
+    {% for v in top_videos %}
+    <div class="video-row">
+      <div class="video-rank">{{ loop.index }}</div>
+      <div class="video-info">
+        <div class="video-title">{{ v.title }}</div>
+        <div class="video-meta">
+          {{ v.channel_title }} ·
+          {% if v.channel_country == 'KR' %}🇰🇷{% elif v.channel_country == 'JP' %}🇯🇵{% endif %}
+          · 좋아요율 {{ v.engagement_rate }}%
+          {% if v.is_short %} · #Shorts{% endif %}
+        </div>
+      </div>
+      <div class="video-views">{{ "{:,}".format(v.view_count) }}회</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="page-footer">
+    <span>FILLZ FISHING GEAR — 주간 트렌드 리포트</span>
+    <span>{{ report_date }} | 기밀 문서</span>
+  </div>
+</div>
+
+</body>
+</html>
