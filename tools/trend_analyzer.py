@@ -125,6 +125,17 @@ def build_analysis_prompt(videos: list[dict], top_channels: list[dict], keywords
     {{"product": "추천 제품/카테고리", "reason": "추천 이유", "opportunity": "기회 요인"}}
   ],
   "market_insight": "한국/일본 시장 차이점 및 인사이트 (2-3문장)",
+  "brand_content_strategy": {{
+    "summary": "루어낚시 장비 브랜드가 이번 주 트렌드를 활용해 콘텐츠를 만든다면 핵심 방향 한 줄 요약",
+    "recommendations": [
+      {{
+        "content_idea": "콘텐츠 아이디어 제목",
+        "approach": "구체적 접근 방식 — 어떻게 기획하고 찍을지, 어떤 메시지를 담을지",
+        "format": "추천 포맷 (예: 쇼츠, 롱폼, 시리즈 등)",
+        "why_it_works": "이번 주 트렌드에서 왜 브랜드에게 효과적인지"
+      }}
+    ]
+  }},
   "translated_titles": {{
     "일본어 또는 영어 원본 제목": "한국어 번역 제목 (30자 이내로 요약)"
   }}
@@ -132,6 +143,7 @@ def build_analysis_prompt(videos: list[dict], top_channels: list[dict], keywords
 
 중요 규칙:
 - trending_topics는 최소 3개, trending_products는 최소 3개, content_recommendations는 정확히 3개, product_recommendations는 정확히 3개 포함하세요.
+- brand_content_strategy.recommendations는 정확히 3개 포함하세요. 크리에이터가 아닌 브랜드 관점에서, 제품을 자연스럽게 녹일 수 있는 콘텐츠 방향으로 작성하세요.
 - translated_titles: TOP 20 영상 중 일본어 또는 영어로 된 제목만 한국어로 번역해주세요. 한국어 제목은 제외. 번역 제목은 핵심만 담아 30자 이내로 작성하세요."""
 
 
@@ -139,7 +151,7 @@ def analyze_with_claude(prompt: str) -> dict:
     """Claude API로 트렌드 분석"""
     message = client.messages.create(
         model="claude-sonnet-4-5",
-        max_tokens=4096,
+        max_tokens=8192,
         messages=[{"role": "user", "content": prompt}],
     )
     raw = message.content[0].text.strip()

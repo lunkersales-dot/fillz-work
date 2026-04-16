@@ -437,7 +437,52 @@ def build_recommendations_page(story, raw, analysis_data):
 
 
 # ════════════════════════════════════════
-# P6: TOP 20 영상 목록
+# P6: 브랜드 콘텐츠 전략
+# ════════════════════════════════════════
+def build_brand_strategy_page(story, raw, analysis_data):
+    usable_w = PAGE_W - 2 * MARGIN
+    analysis = analysis_data.get("analysis", {})
+    brand = analysis.get("brand_content_strategy", {})
+
+    story.append(Paragraph("Brand Content Strategy", STYLES["section_lbl"]))
+    story.append(Paragraph("브랜드 콘텐츠 전략", STYLES["section_ttl"]))
+
+    summary = brand.get("summary", "")
+    if summary:
+        box = ColorRect(summary, C_NAVY, usable_w, padding=5*mm, text_style=STYLES["summary_box"])
+        story.append(box)
+        story.append(Spacer(1, 8*mm))
+
+    C_BRAND = colors.HexColor("#1B2A4A")
+
+    for i, rec in enumerate(brand.get("recommendations", []), 1):
+        fmt_tag = rec.get("format", "")
+        idea = rec.get("content_idea", "")
+        approach = rec.get("approach", "")
+        why = rec.get("why_it_works", "")
+
+        fmt_box = ColorRect(fmt_tag, C_BRAND, 38*mm, padding=3*mm, text_style=STYLES["rec_tag"])
+        story.append(KeepTogether([
+            fmt_box,
+            Spacer(1, 1*mm),
+            Paragraph(idea, STYLES["rec_title"]),
+            Spacer(1, 1*mm),
+            Paragraph(approach, STYLES["rec_body"]),
+            Spacer(1, 1*mm),
+            Paragraph(
+                f"<b>왜 효과적인가</b>  {why}",
+                S(f"bwhy{i}", fontSize=9, textColor=C_NAVY, leading=14),
+            ),
+            Spacer(1, 3*mm),
+            HRFlowable(width=usable_w, color=C_BORDER, thickness=0.5),
+            Spacer(1, 3*mm),
+        ]))
+
+    story.append(PageBreak())
+
+
+# ════════════════════════════════════════
+# P7: TOP 20 영상 목록
 # ════════════════════════════════════════
 def build_videos_page(story, raw, analysis_data):
     usable_w = PAGE_W - 2 * MARGIN
@@ -543,6 +588,7 @@ def main():
     build_trends_page(story, raw, analysis_data)
     build_chart_page(story, raw, analysis_data)
     build_recommendations_page(story, raw, analysis_data)
+    build_brand_strategy_page(story, raw, analysis_data)
     build_videos_page(story, raw, analysis_data)
 
     doc.build(story, onFirstPage=make_on_page(date_str), onLaterPages=make_on_page(date_str))
