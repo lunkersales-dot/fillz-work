@@ -142,8 +142,8 @@ def fmt_num(n):
         return str(n)
 
 
-def make_chart_channels(top_channels: list[dict]) -> io.BytesIO:
-    """채널별 주간 조회수 가로 막대 차트"""
+def _setup_chart_font():
+    """한국어 폰트 설정 (차트 공통)"""
     candidates = [
         "/System/Library/Fonts/AppleSDGothicNeo.ttc",
         "/Library/Fonts/NotoSansCJK-Regular.ttc",
@@ -154,31 +154,90 @@ def make_chart_channels(top_channels: list[dict]) -> io.BytesIO:
             prop = fm.FontProperties(fname=fp)
             plt.rcParams["font.family"] = prop.get_name()
             break
+    # scientific-visualization 스킬 기반 publication 스타일
+    plt.rcParams.update({
+        "figure.facecolor": "white",
+        "axes.facecolor": "white",
+        "axes.linewidth": 0.5,
+        "axes.edgecolor": "#CCCCCC",
+        "axes.axisbelow": True,
+        "axes.grid": True,
+        "grid.color": "#F0F0F0",
+        "grid.linewidth": 0.5,
+        "xtick.major.size": 3,
+        "xtick.major.width": 0.5,
+        "ytick.major.size": 0,
+        "xtick.direction": "out",
+        "savefig.dpi": 150,
+        "savefig.facecolor": "white",
+    })
+
+
+# Okabe-Ito 색맹 안전 팔레트 (scientific-visualization 스킬)
+_OKABE_ITO = ["#0072B2", "#E69F00", "#009E73", "#D55E00",
+              "#56B4E9", "#CC79A7", "#F0E442", "#000000"]
+
+
+def make_chart_channels(top_channels: list[dict]) -> io.BytesIO:
+    """채널별 주간 조회수 가로 막대 차트 (publication-quality)"""
+    _setup_chart_font()
 
     channels = top_channels[:8]
-    names = [c["channel_title"][:10] for c in channels]
+    names = [c["channel_title"][:12] for c in channels]
     views = [c["total_views_this_week"] for c in channels]
 
-    fig, ax = plt.subplots(figsize=(9, 3.5), dpi=130)
-    fig.patch.set_facecolor("white")
-    ax.set_facecolor("white")
-    bar_colors = ["#1B2A4A" if i == 0 else "#888888" for i in range(len(names))]
-    bars = ax.barh(names[::-1], views[::-1], color=bar_colors[::-1], height=0.55)
+    # 1위는 브랜드 네이비, 나머지는 Okabe-Ito 블루 계열
+    bar_colors = ["#1B2A4A"] + [_OKABE_ITO[1]] * (len(names) - 1)
+
+    fig, ax = plt.subplots(figsize=(9, 3.5), dpi=150)
+    bars = ax.barh(names[::-1], views[::-1], color=bar_colors[::-1], height=0.6,
+                   edgecolor="none")
     max_v = max(views) if views else 1
     for bar, view in zip(bars, views[::-1]):
         ax.text(bar.get_width() + max_v * 0.01, bar.get_y() + bar.get_height() / 2,
-                f"{view:,}", va="center", ha="left", fontsize=8, color="#111111")
-    ax.set_xlabel("주간 조회수", fontsize=8, color="#888888")
-    ax.tick_params(labelsize=8, colors="#111111")
-    for spine in ["top", "right"]:
+                f"{view:,}", va="center", ha="left", fontsize=7.5, color="#111111")
+    ax.set_xlabel("주간 조회수", fontsize=8, color="#666666")
+    ax.tick_params(labelsize=8, colors="#333333", length=3)
+    for spine in ["top", "right", "left"]:
         ax.spines[spine].set_visible(False)
-    for spine in ["left", "bottom"]:
-        ax.spines[spine].set_color("#E0E0E0")
+    ax.spines["bottom"].set_color("#CCCCCC")
     ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f"{int(x):,}"))
-    ax.set_xlim(0, max_v * 1.25)
-    plt.tight_layout()
+    ax.set_xlim(0, max_v * 1.22)
+    plt.tight_layout(pad=0.8)
     buf = io.BytesIO()
-    plt.savefig(buf, format="png", bbox_inches="tight", facecolor="white")
+    plt.savefig(buf, format="png", bbox_inches="tight", facecolor="white", dpi=150)
+    buf.seek(0)
+    plt.close(fig)
+    return buf
+
+
+def make_chart_keywords(top_keywords: list[dict]) -> io.BytesIO:
+    """상위 키워드 빈도 가로 막대 차트 (publication-quality, Okabe-Ito 팔레트)"""
+    _setup_chart_font()
+
+    kws = top_keywords[:10]
+    labels = [k["keyword"] for k in kws]
+    counts = [k["count"] for k in kws]
+
+    # Okabe-Ito 팔레트로 순차 색상 적용
+    colors = [_OKABE_ITO[i % len(_OKABE_ITO)] for i in range(len(labels))]
+
+    fig, ax = plt.subplots(figsize=(9, 3.2), dpi=150)
+    bars = ax.barh(labels[::-1], counts[::-1], color=colors[::-1], height=0.6,
+                   edgecolor="none")
+    max_c = max(counts) if counts else 1
+    for bar, cnt in zip(bars, counts[::-1]):
+        ax.text(bar.get_width() + max_c * 0.02, bar.get_y() + bar.get_height() / 2,
+                str(cnt), va="center", ha="left", fontsize=7.5, color="#111111")
+    ax.set_xlabel("언급 빈도", fontsize=8, color="#666666")
+    ax.tick_params(labelsize=8, colors="#333333", length=3)
+    for spine in ["top", "right", "left"]:
+        ax.spines[spine].set_visible(False)
+    ax.spines["bottom"].set_color("#CCCCCC")
+    ax.set_xlim(0, max_c * 1.25)
+    plt.tight_layout(pad=0.8)
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png", bbox_inches="tight", facecolor="white", dpi=150)
     buf.seek(0)
     plt.close(fig)
     return buf
@@ -370,16 +429,26 @@ def build_chart_page(story, raw, analysis_data):
     usable_w = PAGE_W - 2 * MARGIN
     analysis = analysis_data.get("analysis", {})
     top_channels = analysis_data.get("top_channels", [])[:8]
+    top_keywords = analysis_data.get("top_keywords", [])[:10]
 
     story.append(Paragraph("Channel Performance", STYLES["section_lbl"]))
     story.append(Paragraph("채널별 주간 조회수", STYLES["section_ttl"]))
 
     if top_channels:
         chart_buf = make_chart_channels(top_channels)
-        chart_img = Image(chart_buf, width=usable_w, height=60*mm)
+        chart_img = Image(chart_buf, width=usable_w, height=58*mm)
         story.append(chart_img)
 
-    story.append(Spacer(1, 8*mm))
+    story.append(Spacer(1, 6*mm))
+    story.append(Paragraph("Keyword Frequency", STYLES["section_lbl"]))
+    story.append(Paragraph("급상승 키워드 빈도 TOP 10", STYLES["section_ttl"]))
+
+    if top_keywords:
+        kw_buf = make_chart_keywords(top_keywords)
+        kw_img = Image(kw_buf, width=usable_w, height=54*mm)
+        story.append(kw_img)
+
+    story.append(Spacer(1, 6*mm))
     story.append(Paragraph("Market Insight", STYLES["section_lbl"]))
     story.append(Paragraph("시장 인사이트", STYLES["section_ttl"]))
 
